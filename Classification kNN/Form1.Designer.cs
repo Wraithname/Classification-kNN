@@ -39,7 +39,7 @@ namespace Classification_kNN
             // 
             // Lern
             // 
-            this.Lern.Location = new System.Drawing.Point(12, 41);
+            this.Lern.Location = new System.Drawing.Point(12, 42);
             this.Lern.Name = "Lern";
             this.Lern.Size = new System.Drawing.Size(75, 23);
             this.Lern.TabIndex = 0;

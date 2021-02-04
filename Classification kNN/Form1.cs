@@ -28,6 +28,8 @@ namespace Classification_kNN
                 if(ofd.ShowDialog()==DialogResult.OK)
                 {
                     filePath = ofd.FileName;
+                    label1.Text = ofd.FileName;
+                    label1.Visible = true;
                 }
             }
         }
@@ -56,18 +58,19 @@ namespace Classification_kNN
 
         private void getClass_Click(object sender, EventArgs e)
         {
-
-        }
-        private static double EuclideanDistance(double[] sampleOne, double[] sampleTwo)
-        {
-            double d = 0.0;
-
-            for (int i = 0; i < sampleOne.Length; i++)
+            string[] rt = textBox1.Text.Split('\t');
+            double[] unknown = new double[7];
+            int i = 0;
+            foreach(string t in rt)
             {
-                double temp = sampleOne[i] - sampleTwo[i];
-                d += temp * temp;
+                if (i == 7)
+                    break;
+                unknown[i] = Convert.ToDouble(t);
+                i++;
             }
-            return Math.Sqrt(d);
+            var classnumber=knn.StartGettingClass(unknown);
+            label2.Text = classnumber.ToString();
+            label2.Visible = true;
         }
     }
 }
