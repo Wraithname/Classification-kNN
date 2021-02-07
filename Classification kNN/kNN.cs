@@ -15,6 +15,12 @@ namespace Classification_kNN
         List<double[]> etalonClass1 = new List<double[]>();
         List<double[]> etalonClass2 = new List<double[]>();
         List<double[]> all = new List<double[]>();
+
+        public kNN()
+        {
+            LoadData();
+        }
+
         public void StartLerning()
         {
             double[] etalVect;
@@ -57,8 +63,9 @@ namespace Classification_kNN
                     flag = false;
                 }
             }
+            WriteToFile(etalonClass1, "Class 1");
             all.Clear();
-            LoadData();
+            RefreshAll();
             etalVect = lerningEtalon2.First();
             lerningEtalon2.Remove(etalVect);
             all.Remove(etalVect);
@@ -97,6 +104,7 @@ namespace Classification_kNN
                     flag = false;
                 }
             }
+            WriteToFile(etalonClass1, "Class 2");
         }
 
         public int StartGettingClass(double[] unknown)
@@ -115,7 +123,7 @@ namespace Classification_kNN
             }
             return Math.Sqrt(d);
         }
-        public void LoadData()
+        private void LoadData()
         {
             workpath = Directory.GetCurrentDirectory();
             if (Directory.Exists(workpath + @"\Classes"))
@@ -182,6 +190,23 @@ namespace Classification_kNN
                     cl++;
                 }
             }
+        }
+        private void WriteToFile(List<double[]> result, string name)
+        {
+            workpath = Directory.GetCurrentDirectory();
+            if (!Directory.Exists(workpath+@"\Etalon"))
+                Directory.CreateDirectory(workpath + @"\Etalon");
+
+            string pathCsvFile = workpath + @"\Etalon\"+name+".csv";
+            string delimiter = ";";
+            StringBuilder sb = new StringBuilder();
+            int j = 0;
+            foreach (double[] t in result)
+            {
+                    sb.AppendLine(string.Join(delimiter, result[j]));
+                j++;
+            }
+            File.WriteAllText(pathCsvFile, sb.ToString());
         }
     }
 }

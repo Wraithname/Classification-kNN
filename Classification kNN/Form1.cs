@@ -18,7 +18,6 @@ namespace Classification_kNN
         {
             InitializeComponent();
             knn = new kNN();
-            knn.LoadData();
         }
         private void Lern_Click(object sender, EventArgs e)
         {
