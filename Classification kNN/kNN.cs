@@ -24,33 +24,41 @@ namespace Classification_kNN
         public void StartLerning()
         {
             double[] etalVect;
+            //1. Из множества векторов текущего класса случайным образом выбирается один вектор. Назовем его эталоном
             etalVect = lerningEtalon1.First();
             lerningEtalon1.Remove(etalVect);
-            all.Remove(etalVect);
+            all.RemoveAt(0);
             Dictionary<int, double> distance = new Dictionary<int, double>();
             bool flag = true;
+            //Пока список эталонов не будет пуст
             while (lerningEtalon1.Count != 0)
             {
+                //1. Из множества векторов текущего класса случайным образом выбирается один вектор. Назовем его эталоном
                 if (!flag)
                 {
                     etalVect = lerningEtalon1.First();
-                    lerningEtalon1.Remove(etalVect);
-                    all.Remove(etalVect);
+                    lerningEtalon1.RemoveAt(0);
+                    all.RemoveAt(0);
                 }
+                //2. Вычисляются по формуле расстояния
                 for (int i = 0; i < all.Count; i++)
                 {
                     double[] vect = all.ElementAt(i);
                     distance[i] = EuclideanDistance(etalVect, vect);
                 }
+                //3. Среди множества полученных расстояний находим минимальное
                 distance = distance.OrderBy(pair => pair.Value).ToDictionary(pair => pair.Key, pair => pair.Value);
                 var vl = distance.Keys.First();
                 double[] kt = all.ElementAt(vl);
+                //4. Сравниваем минимумы по классам
+                //4.1. С текущим классом, то удаляем из общей выборки и переходим к п.2
                 if (kt[7] == 1)
                 {
-                    all.Remove(kt);
+                    all.RemoveAt(vl);
                     distance.Clear();
                     flag = true;
                 }
+                //4.2. С другим классом, то добавляем в набор и переходим к п.1
                 if (kt[7] == 2)
                 {
                     if (flag)
@@ -64,34 +72,42 @@ namespace Classification_kNN
                 }
             }
             WriteToFile(etalonClass1, "Class 1");
+            //Обновление общего списка
             all.Clear();
             RefreshAll();
+            //1. Из множества векторов текущего класса случайным образом выбирается один вектор. Назовем его эталоном
             etalVect = lerningEtalon2.First();
             lerningEtalon2.Remove(etalVect);
             all.Remove(etalVect);
             flag = true;
             while (lerningEtalon2.Count != 0)
             {
+                //1. Из множества векторов текущего класса случайным образом выбирается один вектор. Назовем его эталоном
                 if (!flag)
                 {
                     etalVect = lerningEtalon2.First();
                     lerningEtalon2.Remove(etalVect);
                     all.Remove(etalVect);
                 }
+                //2. Вычисляются по формуле расстояния
                 for (int i = 0; i < all.Count; i++)
                 {
                     double[] vect = all.ElementAt(i);
                     distance[i] = EuclideanDistance(etalVect, vect);
                 }
+                //3. Среди множества полученных расстояний находим минимальное
                 distance = distance.OrderBy(pair => pair.Value).ToDictionary(pair => pair.Key, pair => pair.Value);
                 var vl = distance.Keys.First();
                 double[] kt = all.ElementAt(vl);
+                //4. Сравниваем минимумы по классам
+                //4.1. С текущим классом, то удаляем из общей выборки и переходим к п.2
                 if (kt[7] == 2)
                 {
                     all.Remove(kt);
                     distance.Clear();
                     flag = true;
                 }
+                //4.2. С другим классом, то добавляем в набор и переходим к п.1
                 if (kt[7] == 1)
                 {
                     if (flag)
@@ -119,7 +135,8 @@ namespace Classification_kNN
             double d = 0.0;
             for (int i = 0; i < 7; i++)
             {
-                d += (sampleOne[i] - sampleTwo[i]) * (sampleOne[i] - sampleTwo[i]);
+                double temp = sampleOne[i] - sampleTwo[i];
+                d += temp * temp;
             }
             return Math.Sqrt(d);
         }
@@ -146,7 +163,6 @@ namespace Classification_kNN
                             vect[j] = Convert.ToDouble(l[j]);
                             vectnorm[j] = Convert.ToDouble(l[j]);
                         }
-
                         vect[7] = cl;
                         all.Add(vect);
                         if (cl == 1)
@@ -194,16 +210,16 @@ namespace Classification_kNN
         private void WriteToFile(List<double[]> result, string name)
         {
             workpath = Directory.GetCurrentDirectory();
-            if (!Directory.Exists(workpath+@"\Etalon"))
+            if (!Directory.Exists(workpath + @"\Etalon"))
                 Directory.CreateDirectory(workpath + @"\Etalon");
 
-            string pathCsvFile = workpath + @"\Etalon\"+name+".csv";
+            string pathCsvFile = workpath + @"\Etalon\" + name + ".csv";
             string delimiter = ";";
             StringBuilder sb = new StringBuilder();
             int j = 0;
             foreach (double[] t in result)
             {
-                    sb.AppendLine(string.Join(delimiter, result[j]));
+                sb.AppendLine(string.Join(delimiter, result[j]));
                 j++;
             }
             File.WriteAllText(pathCsvFile, sb.ToString());
