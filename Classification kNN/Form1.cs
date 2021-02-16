@@ -26,6 +26,8 @@ namespace Classification_kNN
 
         private void getClass_Click(object sender, EventArgs e)
         {
+            knn.ExpertingGettingClass();
+            /*
             string[] rt = textBox1.Text.Split('\t');
             double[] unknown = new double[7];
             int i = 0;
@@ -39,6 +41,7 @@ namespace Classification_kNN
             var classnumber=knn.StartGettingClass(unknown);
             label2.Text = classnumber.ToString();
             label2.Visible = true;
+            */
         }
     }
 }

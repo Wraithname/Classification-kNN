@@ -12,10 +12,12 @@ namespace Classification_kNN
         string workpath;
         List<double[]> lerningEtalon1 = new List<double[]>();
         List<double[]> lerningEtalon2 = new List<double[]>();
+        List<double[]> testData1 = new List<double[]>();
+        List<double[]> testData2 = new List<double[]>();
         List<double[]> etalonClass1 = new List<double[]>();
         List<double[]> etalonClass2 = new List<double[]>();
         List<double[]> all = new List<double[]>();
-
+        enum Expert { Correct, Wrong};
         public kNN()
         {
             LoadData();
@@ -122,12 +124,91 @@ namespace Classification_kNN
             }
             WriteToFile(etalonClass1, "Class 2");
         }
-
+        public void ExpertingGettingClass()
+        {
+            LoadTestData();
+            string[] classes = new string[4];
+            int k = 0,c=0,w=0;
+            foreach (double[] unknown in testData1)
+            {
+                int findedclass = 0;
+                Dictionary<int, double> distance = new Dictionary<int, double>();
+                for (int i = 0; i < all.Count; i++)
+                {
+                    double[] vect = all.ElementAt(i);
+                    distance[i] = EuclideanDistance(unknown, vect);
+                }
+                distance = distance.OrderBy(pair => pair.Value).ToDictionary(pair => pair.Key, pair => pair.Value);
+                var vl = distance.Keys.First();
+                double[] kt = all.ElementAt(vl);
+                findedclass = (int)kt[7];
+                if (findedclass == 1)
+                {
+                    c++;
+                }
+                else
+                {
+                    w++;
+                }
+                k++;
+            }
+            double statc = 0.0;
+            double statw = 0.0;
+            statc = ((double)c / (double)k)*100;
+            statw = ((double)w / (double)k) * 100;
+            classes[0] = c.ToString();
+            classes[1] = w.ToString();
+            classes[2] = statc.ToString();
+            classes[3] = statw.ToString();
+            WriteExpertResultToFile(classes, "ExpertForTest1");
+            classes = new string[4];
+            k = 0; c = 0; w = 0;
+            foreach (double[] unknown in testData2)
+            {
+                int findedclass = 0;
+                Dictionary<int, double> distance = new Dictionary<int, double>();
+                for (int i = 0; i < all.Count; i++)
+                {
+                    double[] vect = all.ElementAt(i);
+                    distance[i] = EuclideanDistance(unknown, vect);
+                }
+                distance = distance.OrderBy(pair => pair.Value).ToDictionary(pair => pair.Key, pair => pair.Value);
+                var vl = distance.Keys.First();
+                double[] kt = all.ElementAt(vl);
+                findedclass = (int)kt[7];
+                if (findedclass == 2)
+                {
+                    c++;
+                }
+                else
+                {
+                    w++;
+                }
+                k++;
+            }
+            statc = 0.0;
+            statw = 0.0;
+            statc = ((double)c / (double)k) * 100;
+            statw = ((double)w / (double)k) * 100;
+            classes[0] = c.ToString();
+            classes[1] = w.ToString();
+            classes[2] = statc.ToString();
+            classes[3] = statw.ToString();
+            WriteExpertResultToFile(classes, "ExpertForTest2");
+        }
         public int StartGettingClass(double[] unknown)
         {
-            int findedclass = 1;
-
-
+            int findedclass = 0;
+            Dictionary<int, double> distance = new Dictionary<int, double>();
+            for (int i = 0; i < all.Count; i++)
+            {
+                double[] vect = all.ElementAt(i);
+                distance[i] = EuclideanDistance(unknown, vect);
+            }
+            distance = distance.OrderBy(pair => pair.Value).ToDictionary(pair => pair.Key, pair => pair.Value);
+            var vl = distance.Keys.First();
+            double[] kt = all.ElementAt(vl);
+            findedclass = (int) kt[7];
             return findedclass;
         }
         private static double EuclideanDistance(double[] sampleOne, double[] sampleTwo)
@@ -170,6 +251,37 @@ namespace Classification_kNN
                         else
                             lerningEtalon2.Add(vectnorm);
                         vect = new double[8];
+                        vectnorm = new double[7];
+                    }
+                    cl++;
+                }
+            }
+        }
+        private void LoadTestData()
+        {
+            workpath = Directory.GetCurrentDirectory();
+            if (Directory.Exists(workpath + @"\Test"))
+            {
+                var classes = Directory.GetFiles(workpath + @"\Test");
+                int cl = 1;
+                List<double[]> temp = new List<double[]>();
+                double[] vectnorm = new double[7];
+                foreach (string path in classes)
+                {
+                    string readText = File.ReadAllText(path);
+                    string[] ment = readText.Split('\n');
+                    temp.Clear();
+                    foreach (string k in ment)
+                    {
+                        string[] l = k.Split('\t');
+                        for (int j = 0; j < 7; j++)
+                        {
+                            vectnorm[j] = Convert.ToDouble(l[j]);
+                        }
+                        if (cl == 1)
+                            testData1.Add(vectnorm);
+                        else
+                            testData2.Add(vectnorm);
                         vectnorm = new double[7];
                     }
                     cl++;
@@ -222,6 +334,20 @@ namespace Classification_kNN
                 sb.AppendLine(string.Join(delimiter, result[j]));
                 j++;
             }
+            File.WriteAllText(pathCsvFile, sb.ToString());
+        }
+        private void WriteExpertResultToFile(string[] result, string name)
+        {
+            workpath = Directory.GetCurrentDirectory();
+            if (!Directory.Exists(workpath + @"\ExpertRes"))
+                Directory.CreateDirectory(workpath + @"\ExpertRes");
+            string pathCsvFile = workpath + @"\ExpertRes\" + name + ".csv";
+
+            string delimiter = ";";
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine(string.Join(delimiter, ("Correct: ;"+result[0])));
+            sb.AppendLine(string.Join(delimiter, ("Wrong: ;" + result[1])));
+            sb.AppendLine(string.Join(delimiter, ("Accuracy: ;" + result[2])));
             File.WriteAllText(pathCsvFile, sb.ToString());
         }
     }
